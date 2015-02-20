@@ -1,0 +1,33 @@
+- v0.3.3
+-- Load the plugin once only (blueyed)
+-- Add font installation instructions, fixes #5 (wikimatze)
+-- added plugin install instructions
+-- slight readme re-ordering
+-- moved contributing section near bottom
+-- added additional screenshots
+-- added more thanks to those whose some more of the glyphs came from
+- v0.3.2
+-- moved screenshots into the wiki (wiki.vim-webdevicons) to reduce unnecessary project size of cloning repo
+- v0.3.1
+-- readme updates (with references to new font-patcher repo)
+-- readme updates screenshots reference wiki
+- v0.3.0
+-- moved font-patcher and patched fonts into a separate repo (nerd-filetype-glyphs-fonts-patcher)
+-- adds twigg file type support
+-- adds cpp file type support
+-- updated utf8 test file with glyphs
+-- readme updates
+- v0.2.1
+-- readme updates
+- v0.2.0
+-- added python font patcher and readme updates
+- v0.1.4
+-- readme updates
+- v0.1.3
+-- fixes #3 make matches case insensitive (ignore case)
+- v0.1.2
+-- fixes lookup for exact file notes
+- v0.1.1
+-- updated readme substantially
+- v0.1.0
+-- release
