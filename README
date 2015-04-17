@@ -1,9 +1,16 @@
 This is a mirror of http://www.vim.org/scripts/script.php?script_id=5114
 
+### brief ###
 
+Adds filetype glyphs (icons) to other vim plugins such as [nerdtree](https://github.com/scrooloose/nerdtree) and
+[vim-airline](https://github.com/bling/vim-airline).
 
---- quick screenshots showing functionality ---
-https://raw.githubusercontent.com/wiki/ryanoasis/vim-webdevicons/screenshots/v0.1.5/overall-screenshot.png
+NOTE: I highly recommend pulling from the repo and managing this plugin with a plugin manager instead of manually!
 
---- repo with all the details ---
+### quick screenshots showing functionality ###
+
+https://raw.githubusercontent.com/wiki/ryanoasis/vim-webdevicons/screenshots/v0.4.0/overall-screenshot.png 
+
+### repo with all the details ###
+
 https://github.com/ryanoasis/vim-webdevicons
