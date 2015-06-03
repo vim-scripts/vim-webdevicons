@@ -1,9 +1,9 @@
-" Version: 0.4.0
+" Version: 0.4.1
 " Webpage: https://github.com/ryanoasis/vim-webdevicons
 " Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
 " Licencse: see LICENSE
 
-let s:version = '0.4.0'
+let s:version = '0.4.1'
 
 " standard fix/safety: line continuation (avoiding side effects) {{{1
 "========================================================================
@@ -186,8 +186,8 @@ endfunction
 function! s:setSyntax()
    if g:webdevicons_conceal_nerdtree_brackets == 1
       exec 'autocmd filetype nerdtree syntax match hideBracketsInNerdTree "[\]|\[]*" contained conceal cchar=_ containedin=ALL'
-      set conceallevel=3
-      set concealcursor=nvic
+      exec 'autocmd filetype nerdtree set conceallevel=3'
+      exec 'autocmd filetype nerdtree set concealcursor=nvic'
    endif
 endfunction
 
