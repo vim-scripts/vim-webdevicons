@@ -1,9 +1,9 @@
-" Version: 0.4.1
+" Version: 0.4.2
 " Webpage: https://github.com/ryanoasis/vim-webdevicons
 " Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
 " Licencse: see LICENSE
 
-let s:version = '0.4.1'
+let s:version = '0.4.2'
 
 " standard fix/safety: line continuation (avoiding side effects) {{{1
 "========================================================================
@@ -28,14 +28,6 @@ endif
 
 if !exists('g:webdevicons_enable_nerdtree')
   let g:webdevicons_enable_nerdtree = 1
-endif
-
-if g:webdevicons_enable_nerdtree == 1
-   if !exists('g:NERDTreePathNotifier')
-      let g:webdevicons_enable_nerdtree = 0
-      echohl WarningMsg |
-      \ echomsg "vim-webdevicons requires a newer version of NERDTree to show glyphs in NERDTree - consider updating NERDTree"
-   endif
 endif
 
 if !exists('g:webdevicons_enable_airline_tabline')
@@ -184,17 +176,21 @@ function! s:setDictionaries()
 endfunction
 
 function! s:setSyntax()
-   if g:webdevicons_conceal_nerdtree_brackets == 1
-      exec 'autocmd filetype nerdtree syntax match hideBracketsInNerdTree "[\]|\[]*" contained conceal cchar=_ containedin=ALL'
-      exec 'autocmd filetype nerdtree set conceallevel=3'
-      exec 'autocmd filetype nerdtree set concealcursor=nvic'
-   endif
+  if g:webdevicons_conceal_nerdtree_brackets == 1
+    augroup webdevicons_conceal_nerdtree_brackets
+      au!
+      autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\]" contained conceal cchar=  containedin=ALL
+      autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\[" contained conceal containedin=ALL
+      autocmd FileType nerdtree set conceallevel=2
+      autocmd FileType nerdtree set concealcursor=nvic
+    augroup END
+  endif
 endfunction
 
 " scope: local
 function! s:initialize()
-   call s:setDictionaries()
-   call s:setSyntax()
+  call s:setDictionaries()
+  call s:setSyntax()
 endfunction
 
 " initialization {{{1
@@ -207,7 +203,7 @@ call s:initialize()
 
 " scope: public
 function! webdevicons#version()
-   return s:version
+  return s:version
 endfunction
 
 " a:1 (bufferName), a:2 (isDirectory)
