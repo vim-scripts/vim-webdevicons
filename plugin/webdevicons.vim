@@ -1,9 +1,9 @@
-" Version: 0.4.2
+" Version: 0.4.3
 " Webpage: https://github.com/ryanoasis/vim-webdevicons
 " Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
 " Licencse: see LICENSE
 
-let s:version = '0.4.2'
+let s:version = '0.4.3'
 
 " standard fix/safety: line continuation (avoiding side effects) {{{1
 "========================================================================
@@ -38,6 +38,10 @@ if !exists('g:webdevicons_enable_airline_statusline')
   let g:webdevicons_enable_airline_statusline = 1
 endif
 
+if !exists('g:webdevicons_enable_airline_statusline_fileformat_symbols')
+  let g:webdevicons_enable_airline_statusline_fileformat_symbols = 1
+endif
+
 if !exists('g:webdevicons_conceal_nerdtree_brackets')
   let g:webdevicons_conceal_nerdtree_brackets = 1
 endif
@@ -63,7 +67,7 @@ if !exists('g:WebDevIconsUnicodeGlyphDoubleWidth')
 endif
 
 if !exists('g:WebDevIconsNerdTreeAfterGlyphPadding')
-  let g:WebDevIconsNerdTreeAfterGlyphPadding = ' '
+  let g:WebDevIconsNerdTreeAfterGlyphPadding = '  '
 endif
 
 
@@ -175,15 +179,16 @@ function! s:setDictionaries()
 
 endfunction
 
+" scope: local
 function! s:setSyntax()
   if g:webdevicons_conceal_nerdtree_brackets == 1
-    augroup webdevicons_conceal_nerdtree_brackets
-      au!
-      autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\]" contained conceal cchar=  containedin=ALL
-      autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\[" contained conceal containedin=ALL
-      autocmd FileType nerdtree set conceallevel=2
-      autocmd FileType nerdtree set concealcursor=nvic
-    augroup END
+	 augroup webdevicons_conceal_nerdtree_brackets
+		au!
+		autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\]" contained conceal containedin=ALL
+		autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\[" contained conceal containedin=ALL
+		autocmd FileType nerdtree set conceallevel=3
+		autocmd FileType nerdtree set concealcursor=nvic
+	 augroup END
   endif
 endfunction
 
@@ -209,7 +214,6 @@ endfunction
 " a:1 (bufferName), a:2 (isDirectory)
 " scope: public
 function! WebDevIconsGetFileTypeSymbol(...)
-
   if a:0 == 0
     let fileNodeExtension = expand("%:e")
     let fileNode = expand("%:t")
@@ -239,8 +243,30 @@ function! WebDevIconsGetFileTypeSymbol(...)
     endif
   endif
 
-  return symbol
+  " Temporary (hopefully) fix for glyph issues in gvim (proper fix is with the
+  " actual font patcher)
+  let artifactFix = "\u00A0"
 
+  return symbol . artifactFix
+
+endfunction
+
+function! WebDevIconsGetFileFormatSymbol(...)
+  let fileformat = ""
+
+  if &fileformat == "dos"
+	  let fileformat = ""
+	elseif &fileformat == "unix"
+		let fileformat = ""
+	elseif &fileformat == "mac"
+		let fileformat = ""
+  endif
+
+  " Temporary (hopefully) fix for glyph issues in gvim (proper fix is with the
+  " actual font patcher)
+  let artifactFix = "\u00A0"
+
+  return &enc . " " . fileformat . artifactFix
 endfunction
 
 " for airline plugin {{{3
@@ -250,9 +276,12 @@ endfunction
 function! AirlineWebDevIcons(...)
   let w:airline_section_x = get(w:, 'airline_section_x', g:airline_section_x)
   let w:airline_section_x .= ' %{WebDevIconsGetFileTypeSymbol()} '
+  if g:webdevicons_enable_airline_statusline_fileformat_symbols
+    let w:airline_section_y = ' %{WebDevIconsGetFileFormatSymbol()} '
+  endif
 endfunction
 
-if g:webdevicons_enable == 1 && g:webdevicons_enable_airline_statusline
+if g:webdevicons_enable == 1 && exists("g:loaded_airline") && g:loaded_airline == 1 && g:webdevicons_enable_airline_statusline
   call airline#add_statusline_func('AirlineWebDevIcons')
 endif
 
@@ -273,18 +302,24 @@ endif
 function! NERDTreeWebDevIconsRefreshListener(event)
   let path = a:event.subject
   let padding = g:WebDevIconsNerdTreeAfterGlyphPadding
+  let prePadding = ''
+  let hasGitFlags = (len(path.flagSet._flagsForScope("git")) > 0)
 
   if g:WebDevIconsUnicodeGlyphDoubleWidth == 0
     let padding = ''
   endif
 
+  if hasGitFlags && g:WebDevIconsUnicodeGlyphDoubleWidth == 1
+    let prePadding = ' '
+  endif
+
   if !path.isDirectory
-    let flag = WebDevIconsGetFileTypeSymbol(path.str()) . padding
+    let flag = prePadding . WebDevIconsGetFileTypeSymbol(path.str()) . padding
   elseif path.isDirectory && g:WebDevIconsUnicodeDecorateFolderNodes == 1
     if g:WebDevIconsUnicodeDecorateFolderNodesExactMatches == 1
-      let flag = WebDevIconsGetFileTypeSymbol(path.str(), path.isDirectory) . padding
+      let flag = prePadding . WebDevIconsGetFileTypeSymbol(path.str(), path.isDirectory) . padding
     else
-      let flag = g:WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
+      let flag = prePadding . g:WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
     endif
   else
     let flag = ''
