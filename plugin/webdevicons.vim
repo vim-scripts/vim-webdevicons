@@ -1,9 +1,9 @@
-" Version: 0.4.3
+" Version: 0.4.4
 " Webpage: https://github.com/ryanoasis/vim-webdevicons
 " Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
 " Licencse: see LICENSE
 
-let s:version = '0.4.3'
+let s:version = '0.4.4'
 
 " standard fix/safety: line continuation (avoiding side effects) {{{1
 "========================================================================
@@ -50,10 +50,14 @@ endif
 " config options {{{1
 "========================================================================
 
-let g:WebDevIconsUnicodeDecorateFileNodes = 1
+if !exists('g:WebDevIconsUnicodeDecorateFileNodes')
+  let g:WebDevIconsUnicodeDecorateFileNodes = 1
+endif
 
 " whether to show default folder glyphs on directories:
-let g:WebDevIconsUnicodeDecorateFolderNodes = 0
+if !exists('g:WebDevIconsUnicodeDecorateFolderNodes')
+  let g:WebDevIconsUnicodeDecorateFolderNodes = 0
+endif
 
 " whether to try to match folder notes with any exact file node matches
 " default is to match but requires WebDevIconsUnicodeDecorateFolderNodes set
@@ -70,6 +74,10 @@ if !exists('g:WebDevIconsNerdTreeAfterGlyphPadding')
   let g:WebDevIconsNerdTreeAfterGlyphPadding = '  '
 endif
 
+if !exists('g:WebDevIconsNerdTreeGitPluginForceVAlign')
+  let g:WebDevIconsNerdTreeGitPluginForceVAlign = 1
+endif
+
 
 " config defaults {{{1
 "========================================================================
@@ -79,7 +87,7 @@ if !exists('g:WebDevIconsUnicodeDecorateFileNodesDefaultSymbol')
 endif
 
 if !exists('g:WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol')
-  let g:WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol = ''
+  let g:WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol = ''
 endif
 
 " functions {{{1
@@ -181,7 +189,7 @@ endfunction
 
 " scope: local
 function! s:setSyntax()
-  if g:webdevicons_conceal_nerdtree_brackets == 1
+  if g:webdevicons_enable_nerdtree == 1 && g:webdevicons_conceal_nerdtree_brackets == 1
 	 augroup webdevicons_conceal_nerdtree_brackets
 		au!
 		autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\]" contained conceal containedin=ALL
@@ -190,6 +198,14 @@ function! s:setSyntax()
 		autocmd FileType nerdtree set concealcursor=nvic
 	 augroup END
   endif
+endfunction
+
+" scope: local
+function! s:hardRefreshNerdTree()
+	if g:webdevicons_enable_nerdtree == 1 && g:webdevicons_conceal_nerdtree_brackets == 1 && g:NERDTree.IsOpen()
+		NERDTreeClose
+		NERDTree
+	endif
 endfunction
 
 " scope: local
@@ -210,6 +226,13 @@ call s:initialize()
 function! webdevicons#version()
   return s:version
 endfunction
+
+" scope: public
+function! webdevicons#refresh()
+  call s:setSyntax()
+  call s:hardRefreshNerdTree()
+endfunction
+
 
 " a:1 (bufferName), a:2 (isDirectory)
 " scope: public
@@ -304,6 +327,7 @@ function! NERDTreeWebDevIconsRefreshListener(event)
   let padding = g:WebDevIconsNerdTreeAfterGlyphPadding
   let prePadding = ''
   let hasGitFlags = (len(path.flagSet._flagsForScope("git")) > 0)
+  let hasGitNerdTreePlugin = (exists('g:loaded_nerdtree_git_status') == 1)
 
   if g:WebDevIconsUnicodeGlyphDoubleWidth == 0
     let padding = ''
@@ -311,6 +335,11 @@ function! NERDTreeWebDevIconsRefreshListener(event)
 
   if hasGitFlags && g:WebDevIconsUnicodeGlyphDoubleWidth == 1
     let prePadding = ' '
+  endif
+
+  " align vertically at the same level: non git-flag nodes with git-flag nodes
+  if g:WebDevIconsNerdTreeGitPluginForceVAlign && !hasGitFlags && hasGitNerdTreePlugin
+    let prePadding .= '  '
   endif
 
   if !path.isDirectory
