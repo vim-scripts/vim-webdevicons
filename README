@@ -1,9 +1,9 @@
 This is a mirror of http://www.vim.org/scripts/script.php?script_id=5114
 
-adds font icons (glyphs ★♨☢) to programming languages, libraries, and general web developer filetypes for vim plugins such as: NERDTree, vim-airline, and lightline.vim
+adds font icons (glyphs ★♨☢) to programming languages, libraries, and web developer filetypes for: NERDTree, vim-airline, ctrlp, unite, lightline.vim, vimfiler, and flagship
 
 NOTE: I highly recommend pulling from the repo and managing this plugin with a plugin manager instead of manually!
 
-* Overview Screenshot: https://raw.githubusercontent.com/wiki/ryanoasis/vim-webdevicons/screenshots/v0.4.4/overall-screenshot.png 
+* Overview Screenshot: https://raw.githubusercontent.com/wiki/ryanoasis/vim-devicons/screenshots/v0.5.0/overall-screenshot.png
 
-* More Details: https://github.com/ryanoasis/vim-webdevicons
+* More Details: https://github.com/ryanoasis/vim-devicons
