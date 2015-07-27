@@ -1,9 +1,9 @@
-" Version: 0.5.0
+" Version: 0.5.1
 " Webpage: https://github.com/ryanoasis/vim-webdevicons
 " Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
 " Licencse: see LICENSE
 
-let s:version = '0.5.0'
+let s:version = '0.5.1'
 
 " standard fix/safety: line continuation (avoiding side effects) {{{1
 "========================================================================
@@ -113,6 +113,11 @@ endif
 
 " local functions {{{2
 "========================================================================
+
+" scope: local
+function! s:strip(input)
+  return substitute(a:input, '^\s*\(.\{-}\)\s*$', '\1', '')
+endfunction
 
 " scope: local
 function! s:setDictionaries()
@@ -347,11 +352,10 @@ endfunction
 " mostly a hack/overwrite to add icons to the official inactive ctrlP repo
 " only overwriting the necessary functions to make it work
 " unless we detect the newer active ctrlp fork
+" @TODO implementation for CtrlP buffer and find file mode
 function! s:initializeCtrlP()
   if exists("g:loaded_ctrlp") && g:webdevicons_enable_ctrlp
     let g:ctrlp_open_func = {
-      \ 'files': 'webdevicons#ctrlPOpenFunc',
-      \ 'buffers': 'webdevicons#ctrlPOpenFunc',
       \ 'mru files': 'webdevicons#ctrlPOpenFunc'
       \ }
 
@@ -480,9 +484,12 @@ endfunction
 
 " scope: public
 function! webdevicons#ctrlPOpenFunc(action, line)
+  let line = a:line
+  " Remove non-breaking space which is present (NBSP U+00A0)
+  let line = substitute(line, " ", "", "")
+  " Trim leading and trailing whitespace and replace private character range characters
+  let line = s:strip(substitute(line, "[-]", "", ""))
   " Use CtrlP's default file opening function
-  let devIconPrefixLength = 6
-  let line = strpart(a:line, devIconPrefixLength)
   call call('ctrlp#acceptfile', [a:action, line])
 endfunction
 
