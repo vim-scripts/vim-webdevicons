@@ -1,9 +1,9 @@
-" Version: 0.5.2
+" Version: 0.5.3
 " Webpage: https://github.com/ryanoasis/vim-webdevicons
 " Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
-" Licencse: see LICENSE
+" License: see LICENSE
 
-let s:version = '0.5.2'
+let s:version = '0.5.3'
 
 " standard fix/safety: line continuation (avoiding side effects) {{{1
 "========================================================================
@@ -127,13 +127,14 @@ function! s:setDictionaries()
 		\	'scss'     : '',
 		\	'htm'      : '',
 		\	'html'     : '',
+		\	'slim'     : '',
 		\	'css'      : '',
 		\	'less'     : '',
 		\	'md'       : '',
 		\	'json'     : '',
 		\	'js'       : '',
 		\	'jsx'      : '',
-		\	'rb'       : '',
+		\	'rb'       : '',
 		\	'php'      : '',
 		\	'py'       : '',
 		\	'pyc'      : '',
@@ -162,6 +163,7 @@ function! s:setDictionaries()
 		\	'lua'      : '',
 		\	'java'     : '',
 		\	'sh'       : '',
+		\	'fish'     : '',
 		\	'diff'     : '',
 		\	'db'       : '',
 		\	'clj'      : '',
@@ -266,8 +268,8 @@ function! s:setSyntax()
       au!
       autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\]" contained conceal containedin=ALL
       autocmd FileType nerdtree syntax match hideBracketsInNerdTree "\[" contained conceal containedin=ALL
-      autocmd FileType nerdtree set conceallevel=3
-      autocmd FileType nerdtree set concealcursor=nvic
+      autocmd FileType nerdtree setlocal conceallevel=3
+      autocmd FileType nerdtree setlocal concealcursor=nvic
     augroup END
   endif
 endfunction
@@ -318,6 +320,11 @@ function! s:initializeUnite()
         endif
 
         let icon = WebDevIconsGetFileTypeSymbol(filename, isdirectory(filename))
+
+        " prevent filenames of buffers getting 'lost'
+        if filename != path
+          let path = printf("%s %s", filename, path)
+        endif
 
         " Customize output format.
         let candidate.abbr = printf("%s %s", icon, path)
