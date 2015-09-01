@@ -3,7 +3,7 @@
 " Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
 " License: see LICENSE
 
-let s:version = '0.5.3'
+let s:version = '0.5.4'
 
 " standard fix/safety: line continuation (avoiding side effects) {{{1
 "========================================================================
@@ -131,6 +131,7 @@ function! s:setDictionaries()
 		\	'css'      : '',
 		\	'less'     : '',
 		\	'md'       : '',
+		\	'markdown' : '',
 		\	'json'     : '',
 		\	'js'       : '',
 		\	'jsx'      : '',
@@ -151,6 +152,7 @@ function! s:setDictionaries()
 		\	'bmp'      : '',
 		\	'png'      : '',
 		\	'gif'      : '',
+		\	'ico'      : '',
 		\	'twig'     : '',
 		\	'cpp'      : '',
 		\	'c++'      : '',
@@ -164,8 +166,12 @@ function! s:setDictionaries()
 		\	'java'     : '',
 		\	'sh'       : '',
 		\	'fish'     : '',
+		\	'ml'       : 'λ',
+		\	'mli'      : 'λ',
 		\	'diff'     : '',
 		\	'db'       : '',
+		\	'sql'      : '',
+		\	'dump'     : '',
 		\	'clj'      : '',
 		\	'cljs'     : '',
 		\	'edn'      : '',
