@@ -3,12 +3,15 @@ CHANGELOG
 ================================================================================
 This project is using [Semantic Versioning 2.0.0](http://semver.org/)
 
+- v0.6.1
+  - Fixed likely breaking bug: undefined variable g:DevIconsEnableFoldersOpenClose (fixes #109)
+  - Fixed up the changelog details
 - v0.6.0
   - Added support for [Powerline](https://github.com/powerline/powerline) (enhancement PR #74) (@delphinus35)
   - Added support for 'ts' (TypeScript) filetypes (enhancement #79)
   - Added support for 'jl' (Julia) filetypes
   - Added support for 'bat' (batch) filetypes
-  - Added support for 'ejs' (Embedded JavaScript Templates) filetypes
+  - Added support for 'ejs' (Embedded JavaScript Templates) filetypes (enhancement #105) (@lerrua)
   - Added support for 'react.jsx' filetype
   - Added support for 'procfile' filetype
   - Changed default 'go' filetype glyph to a better one
