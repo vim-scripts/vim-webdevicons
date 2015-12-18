@@ -1,9 +1,9 @@
-" Version: 0.6.1
+" Version: 0.7.0
 " Webpage: https://github.com/ryanoasis/vim-devicons
 " Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
 " License: see LICENSE
 
-let s:version = '0.6.1'
+let s:version = '0.7.0'
 
 " standard fix/safety: line continuation (avoiding side effects) {{{1
 "========================================================================
@@ -80,6 +80,14 @@ endif
 
 if !exists('g:DevIconsEnableFoldersOpenClose')
   let g:DevIconsEnableFoldersOpenClose = 0
+endif
+
+if !exists('g:DevIconsEnableFolderPatternMatching')
+  let g:DevIconsEnableFolderPatternMatching = 1
+endif
+
+if !exists('g:DevIconsEnableFolderExtensionPatternMatching')
+  let g:DevIconsEnableFolderExtensionPatternMatching = 0
 endif
 
 " whether to try to match folder notes with any exact file node matches
@@ -189,6 +197,7 @@ function! s:setDictionaries()
 		\	'sql'      : '',
 		\	'dump'     : '',
 		\	'clj'      : '',
+		\	'cljc'     : '',
 		\	'cljs'     : '',
 		\	'edn'      : '',
 		\	'scala'    : '',
@@ -405,10 +414,8 @@ endfunction
 "========================================================================
 
 " scope: local
-" Either initialize for: kien/ctrlp.vim OR up to date fork: ctrlpvim/ctrlp.vim
-" mostly a hack/overwrite to add icons to the official inactive ctrlP repo
-" only overwriting the necessary functions to make it work
-" unless we detect the newer active ctrlp fork
+" Initialize for up to date ctrlp fork: ctrlpvim/ctrlp.vim
+" Support for kien/ctrlp.vim deprecated since v0.7.0
 " @TODO implementation for CtrlP buffer and find file mode
 function! s:initializeCtrlP()
   if exists("g:loaded_ctrlp") && g:webdevicons_enable_ctrlp
@@ -421,92 +428,9 @@ function! s:initializeCtrlP()
       let g:ctrlp_mruf_map_string = '!stridx(v:val, cwd) ? WebDevIconsGetFileTypeSymbol(strpart(v:val, strridx(v:val, "/"))) . " " . strpart(v:val, idx) : g:WebDevIconsUnicodeDecorateFileNodesDefaultSymbol . " " . v:val'
     else
       " logic for kien/ctrlp.vim:
-      call s:initializeCtrlPOverwrite()
+      echohl WarningMsg |
+        \ echomsg "vim-devicons: https://github.com/kien/ctrlp.vim is deprecated since v0.7.0, please use https://github.com/ctrlpvim/ctrlp.vim"
     endif
-  endif
-endfunction
-
-" scope: local
-" logic for kien/ctrlp.vim
-" @todo a better cleaner way? is it possible?
-function! s:initializeCtrlPOverwrite()
-  if g:webdevicons_enable_ctrlp
-    " Static variables {{{1
-    let [s:mrbs, s:mrufs] = [[], []]
-
-    fu! ctrlp#mrufiles#opts()
-    	let [pref, opts] = ['g:ctrlp_mruf_', {
-    		\ 'max': ['s:max', 250],
-    		\ 'include': ['s:in', ''],
-    		\ 'exclude': ['s:ex', ''],
-    		\ 'case_sensitive': ['s:cseno', 1],
-    		\ 'relative': ['s:re', 0],
-    		\ 'save_on_update': ['s:soup', 1],
-    		\ }]
-    	for [ke, va] in items(opts)
-    		let [{va[0]}, {pref.ke}] = [pref.ke, exists(pref.ke) ? {pref.ke} : va[1]]
-    	endfo
-    endf
-    cal ctrlp#mrufiles#opts()
-
-    fu! s:mergelists()
-    	let diskmrufs = ctrlp#utils#readfile(ctrlp#mrufiles#cachefile())
-    	cal filter(diskmrufs, 'index(s:mrufs, v:val) < 0')
-    	let mrufs = s:mrufs + diskmrufs
-    	retu s:chop(mrufs)
-    endf
-
-    fu! s:chop(mrufs)
-    	if len(a:mrufs) > {s:max} | cal remove(a:mrufs, {s:max}, -1) | en
-    	retu a:mrufs
-    endf
-
-    fu! s:reformat(mrufs, ...)
-    	let cwd = getcwd()
-    	let cwd .= cwd !~ '[\/]$' ? ctrlp#utils#lash() : ''
-    	if {s:re}
-    		let cwd = exists('+ssl') ? tr(cwd, '/', '\') : cwd
-    		cal filter(a:mrufs, '!stridx(v:val, cwd)')
-    	en
-    	if a:0 && a:1 == 'raw' | retu a:mrufs | en
-    	let idx = strlen(cwd)
-    	if exists('+ssl') && &ssl
-    		let cwd = tr(cwd, '\', '/')
-    		cal map(a:mrufs, 'tr(v:val, "\\", "/")')
-    	en
-    	retu map(a:mrufs, '!stridx(v:val, cwd) ? WebDevIconsGetFileTypeSymbol(strpart(v:val, strridx(v:val, "/"))) . " " . strpart(v:val, idx) : g:WebDevIconsUnicodeDecorateFileNodesDefaultSymbol . " " . v:val')
-    endf
-
-    fu! ctrlp#mrufiles#refresh(...)
-    	let mrufs = s:mergelists()
-    	cal filter(mrufs, '!empty(ctrlp#utils#glob(v:val, 1)) && !s:excl(v:val)')
-    	if exists('+ssl')
-    		cal map(mrufs, 'tr(v:val, "/", "\\")')
-    		cal map(s:mrufs, 'tr(v:val, "/", "\\")')
-    		let cond = 'count(mrufs, v:val, !{s:cseno}) == 1'
-    		cal filter(mrufs, cond)
-    		cal filter(s:mrufs, cond)
-    	en
-    	cal s:savetofile(mrufs)
-    	retu a:0 && a:1 == 'raw' ? [] : s:reformat(mrufs)
-    endf
-
-    fu! ctrlp#mrufiles#remove(files)
-    	let mrufs = []
-    	if a:files != []
-    		let mrufs = s:mergelists()
-    		let cond = 'index(a:files, v:val, 0, !{s:cseno}) < 0'
-    		cal filter(mrufs, cond)
-    		cal filter(s:mrufs, cond)
-    	en
-    	cal s:savetofile(mrufs)
-    	retu s:reformat(mrufs)
-    endf
-
-    fu! ctrlp#mrufiles#list(...)
-    	retu a:0 ? a:1 == 'raw' ? s:reformat(s:mergelists(), a:1) : 0
-    		\ : s:reformat(s:mergelists())
-    endf
   endif
 endfunction
 
@@ -568,24 +492,30 @@ function! WebDevIconsGetFileTypeSymbol(...)
     endif
   endif
 
-  let symbol = g:WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
-  let fileNodeExtension = tolower(fileNodeExtension)
-  let fileNode = tolower(fileNode)
+  if isDirectory == 0 || g:DevIconsEnableFolderPatternMatching
 
-  for [pattern, glyph] in items(g:WebDevIconsUnicodeDecorateFileNodesPatternSymbols)
-    if match(fileNode, pattern) != -1
-      let symbol = glyph
-    endif
-  endfor
+    let symbol = g:WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
+    let fileNodeExtension = tolower(fileNodeExtension)
+    let fileNode = tolower(fileNode)
 
-  if symbol == g:WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
-    if has_key(g:WebDevIconsUnicodeDecorateFileNodesExactSymbols, fileNode)
-      let symbol = g:WebDevIconsUnicodeDecorateFileNodesExactSymbols[fileNode]
-    elseif has_key(g:WebDevIconsUnicodeDecorateFileNodesExtensionSymbols, fileNodeExtension)
-      let symbol = g:WebDevIconsUnicodeDecorateFileNodesExtensionSymbols[fileNodeExtension]
-    elseif isDirectory == 1
-      let symbol = g:WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
+    for [pattern, glyph] in items(g:WebDevIconsUnicodeDecorateFileNodesPatternSymbols)
+      if match(fileNode, pattern) != -1
+        let symbol = glyph
+      endif
+    endfor
+
+    if symbol == g:WebDevIconsUnicodeDecorateFileNodesDefaultSymbol
+      if has_key(g:WebDevIconsUnicodeDecorateFileNodesExactSymbols, fileNode)
+        let symbol = g:WebDevIconsUnicodeDecorateFileNodesExactSymbols[fileNode]
+      elseif ((isDirectory == 1 && g:DevIconsEnableFolderExtensionPatternMatching) || isDirectory == 0) && has_key(g:WebDevIconsUnicodeDecorateFileNodesExtensionSymbols, fileNodeExtension)
+        let symbol = g:WebDevIconsUnicodeDecorateFileNodesExtensionSymbols[fileNodeExtension]
+      elseif isDirectory == 1
+        let symbol = g:WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
+      endif
     endif
+
+  else
+    let symbol = g:WebDevIconsUnicodeDecorateFolderNodesDefaultSymbol
   endif
 
   " Temporary (hopefully) fix for glyph issues in gvim (proper fix is with the
@@ -599,11 +529,16 @@ endfunction
 " scope: public
 function! WebDevIconsGetFileFormatSymbol(...)
   let fileformat = ""
+  let operatingsystem = system("uname -s")
 
   if &fileformat == "dos"
     let fileformat = ""
   elseif &fileformat == "unix"
-    let fileformat = ""
+    if operatingsystem == "Darwin\n"
+      let fileformat = ""
+    else
+      let fileformat = ""
+    endif
   elseif &fileformat == "mac"
     let fileformat = ""
   endif

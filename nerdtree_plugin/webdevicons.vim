@@ -1,3 +1,7 @@
+" Version: 0.7.0
+" Webpage: https://github.com/ryanoasis/vim-devicons
+" Maintainer: Ryan McIntyre <ryanoasis@gmail.com>
+" License: see LICENSE
 
 " @todo fix duplicate global variable initialize here:
 if !exists('g:webdevicons_enable')
@@ -10,6 +14,14 @@ endif
 
 if !exists('g:DevIconsEnableFoldersOpenClose')
   let g:DevIconsEnableFoldersOpenClose = 0
+endif
+
+if !exists('g:DevIconsEnableFolderPatternMatching')
+  let g:DevIconsEnableFolderPatternMatching = 1
+endif
+
+if !exists('g:DevIconsEnableFolderExtensionPatternMatching')
+  let g:DevIconsEnableFolderExtensionPatternMatching = 0
 endif
 
 " end @todo duplicate global variables
